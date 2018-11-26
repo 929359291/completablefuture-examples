@@ -67,4 +67,5 @@ public class RealLifeCompletableFutureExample {
     private static void simulateDelay() throws InterruptedException {
         Thread.sleep(5000);
     }
+
 }
