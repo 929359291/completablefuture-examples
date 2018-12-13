@@ -13,14 +13,15 @@ public class RealLifeCompletableFutureExample {
 
         cars().thenCompose(cars -> {
             List<CompletionStage<Car>> updatedCars = cars.stream()
-                    .map(car -> rating(car.manufacturerId).thenApply(r -> {
+                    .map(car -> rating(car.manufacturerId).thenApplyAsync(r -> {
                         car.setRating(r);
                         return car;
                     })).collect(Collectors.toList());
 
             CompletableFuture<Void> done = CompletableFuture
-                    .allOf(updatedCars.toArray(new CompletableFuture[updatedCars.size()]));
-            return done.thenApply(v -> updatedCars.stream().map(CompletionStage::toCompletableFuture)
+                    .allOf(updatedCars.toArray(new CompletableFuture[0]));
+
+            return done.thenApplyAsync(v -> updatedCars.stream().map(CompletionStage::toCompletableFuture)
                     .map(CompletableFuture::join).collect(Collectors.toList()));
         }).whenComplete((cars, th) -> {
             if (th == null) {
