@@ -374,14 +374,16 @@ public class CompletableFutureExamples {
      * 使用thenApplyAsync()替换那些单个的CompletableFutures的方法，
      * allOf()会在通用池中的线程中异步地执行。所以我们需要调用join方法等待它完成。
      */
+    static ExecutorService executorService = Executors.newFixedThreadPool(5);
     @Test
     public void allOfAsyncExample() {
+
         StringBuilder result = new StringBuilder();
-        List<String> messages = Arrays.asList("a", "b", "c");
+        List<String> messages = Arrays.asList("a", "b", "c", "d", "e");
         List<CompletableFuture<String>> futures = messages.stream()
-                                                          .map(msg -> CompletableFuture.completedFuture(msg)
-                                                                                       .thenApplyAsync(s -> delayedUpperCase(s)))
-                                                                                       .collect(Collectors.toList());
+                .map(msg -> CompletableFuture.completedFuture(msg)
+                        .thenApplyAsync(s -> delayedUpperCase(s), executorService))
+                .collect(Collectors.toList());
 
         CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).whenComplete((v, th) -> {
             futures.forEach(cf -> assertTrue(isUpperCase(cf.getNow(null))));
@@ -414,8 +416,11 @@ public class CompletableFutureExamples {
 
     private static void randomSleep() {
         try {
-            Thread.sleep(random.nextInt(5000));
-            System.out.println("sleep 1000 seconds");
+            int sleepTime = 5000;
+//            int sleepTime = random.nextInt(5000);
+            Thread.sleep(sleepTime);
+            System.out.println(Thread.currentThread().getName());
+            System.out.println("sleep " + sleepTime +" seconds");
         } catch (InterruptedException e) {
             // ...
         }
