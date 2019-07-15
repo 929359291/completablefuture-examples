@@ -395,6 +395,31 @@ public class CompletableFutureExamples {
         System.out.println(result.toString());
     }
 
+    @Test
+    public void testRunAsyncAllOf(){
+        System.out.println("completableFuture test");
+        List<CompletableFuture<Void>> runs = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+            int finalI = i;
+            CompletableFuture<Void> async = CompletableFuture.runAsync(() -> {
+                if (finalI == 1){
+                    int num = 1 / 0;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("1111111111");
+            });
+
+            runs.add(async);
+        }
+
+        CompletableFuture.allOf(runs.toArray(new CompletableFuture[0])).join();
+    }
+
     private static boolean isUpperCase(String s) {
         for (int i = 0; i < s.length(); i++) {
             if (Character.isLowerCase(s.charAt(i))) {
